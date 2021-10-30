@@ -1,7 +1,7 @@
 /*
  * @Author: Wannabtl
  * @Date: 2021-10-28 12:08:30
- * @LastEditTime: 2021-10-30 12:31:56
+ * @LastEditTime: 2021-10-30 23:56:02
  * @Description: 
 */
 #include<ctime>
@@ -15,20 +15,10 @@
 #define pc putchar 
 #define fir(n) for(int i=1;i<=n;i++)
 using namespace std;
+HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 bool Flag=0; 
 int Step[10];
 int Kill[10];
-void cls(){ 
-    COORD pos; 
-    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleCursorPosition(hOut, pos);
-    for(int i=0;i<100;i++){ 
-        for(int j=0;j<100;j++) putchar(' '); 
-        pc('\n'); 
-    } 
-    pos.X = 0; pos.Y = 0; 
-    SetConsoleCursorPosition(hOut, pos); 
-}
 struct Player{
 	string name;
     string atk_style; string dead_style;
@@ -53,7 +43,11 @@ struct Player{
 6:
 7:
 8:
-*/    
+*/  
+#pragma region  //基础快捷设置
+void PrtColor(int x){ 
+    SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),x); 
+}
 char Dwn(char c){
 	if(isalpha(c)&&c<'a') c=c-'A'+'a';
 	return c;
@@ -86,9 +80,11 @@ void AddChar(Player &a,Player b){
 }
 
 void Wait(){
-	prt("按Z键继续...\n"); 
+    PrtColor(0x06);
+	prt("\n\n\n------按Z键继续------\n"); 
 	char c; Read(c,'z','z');
 	system("cls");
+    PrtColor(0x07);
 }
 
 void Head(char c,int x,string s){
@@ -118,6 +114,8 @@ string GetTime(){
     strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S",localtime(&timep) );//对日期和时间进行格式化
     return tmp;
 }
+
+#pragma endregion
 void GoDead(){
     system("cls");
     Sprtt("GAME OVER!!!",0.1); ps(1); Wait(); 
@@ -449,8 +447,10 @@ test1:
     Sprtt("Error!\n",0.01);
     Sprtt("Error!\n",0.01);
     Sprtt("Definition has been attacked\n",0.01);
+    PrtColor(0x06);
     Sprtt("Please Input Your Own Id:        (And Click Enter)\n",0.05);
     cin>>P1.name;
+    PrtColor(0x07);
 	Sprtt("Loding",0.03); fir(20){ putchar('.'); ps(0.1); } putchar('\n');
     Sprtt("Id: ",0.03); Sprtt(P1.name,0.03); 
     Sprtt("\nSet Hp: 150/150\n",0.03);
@@ -466,7 +466,11 @@ test1:
     
 	fir(30){ putchar('.'); ps(0.1); }
 	system("cls");
-	Slip(1); Sprtt("Link Start!\n",0.5); Slip(3); Wait();
+	Slip(1); 
+    PrtColor(0x06);
+    Sprtt("Link Start!\n",0.5); 
+    PrtColor(0x07);
+    Slip(3); Wait();
 	
 	prtt("今年是恶龙苏醒以来的第三年\n"); ps(1);
 	prtt("圣城上下日日夜夜戒备着恶龙的突袭\n"); ps(1); 
@@ -474,7 +478,9 @@ test1:
 	prtt("明天你将跟随调查兵团一起前往荒芜之地讨伐恶龙\n\n"); ps(1); 
 	prtt("然而教官Sufun远远叫停了训练中的你，在教官室中挥手\n"); ps(1); 
 	Slip(1); 
+    PrtColor(0x06);
 	prt("A.前往教官室      B.继续训练\n");
+    PrtColor(0x07);
 	Slip(1);
 	char c;
 	while(1){
@@ -497,9 +503,11 @@ bool ChooseJobs(){
 
 	system("cls");
 	
-	prt("你打量着黑暗里的一切，周遭的木架上摆放着布满灰尘的古物\n");
-	prt("A.拿起枯朽的法杖\n"); // \nB.拿起生锈的双剑\nC.拿起破烂的长袍\nD.拿起\n");
-	char c;
+	prt("你打量着黑暗里的一切，周遭的木架上摆放着布满灰尘的古物\n\n\n");
+	PrtColor(0x06);
+    prt("A.拿起枯朽的法杖\n"); // \nB.拿起生锈的双剑\nC.拿起破烂的长袍\nD.拿起\n");
+	PrtColor(0x07);
+    char c;
 	while(1){
 		c=gc; c=Dwn(c); printf("%c\n",c);
 		if(c>='a'&&c<='d') break ;
@@ -547,7 +555,7 @@ bool Boss1(){
 }
 bool Chapter_1(){
 #pragma region //输出图像
-    cls();
+    system("cls");
     Head('-',40,"荒芜之地边境");
     prt("探索度 %d %% \n\n",Step[1]);
     Build_Map();
@@ -580,35 +588,46 @@ movement:
         while(Martix[P1.x][P1.y]>=9) Martix[P1.x][P1.y]/=10;
         if(!Martix[P1.x][P1.y]) Martix[P1.x][P1.y]=1;
     }
+    bool fid=Martix[xx][yy]==0;
     Martix[xx][yy]=Martix[xx][yy]*10+9;
-    P1.x=xx; P1.y=yy; 
+     
+
 #pragma region //输出图像
-    system("cls");
-    Head('-',40,"荒芜之地边境");
-    prt("探索度 %d %% \n\n",Step[1]);
-    Build_Map();
+    HANDLE handle= GetStdHandle(STD_OUTPUT_HANDLE);
+    COORD coord={0,0};
+    coord.X=coord.Y=0;
+    short sx=4+P1.x*2,sy=P1.y*4-2;
+    coord={sy,sx};
+    SetConsoleCursorPosition(handle, coord);
+    puts(" ");
+
+    P1.x=xx; P1.y=yy;
+    sx=4+P1.x*2,sy=P1.y*4-2;
+    coord={sy,sx};
+    SetConsoleCursorPosition(handle, coord);
+    puts("P");
 #pragma endregion 
-/*
-    if(x=='a'){
-        if(RateCalc(70)){
-            Sprtt("你遭遇了史莱姆！\n",0.08); ps(1.5);
-            Battle(P1,Monster[1],1);
-            Kill[1]++;
-        }
+
+    if(!fid) goto movement;
+    coord={0,16};
+    SetConsoleCursorPosition(handle, coord);
+    if(fid&&RateCalc(70)){
+        Sprtt("你遭遇了史莱姆！\n",0.08); ps(1.5);
+        Battle(P1,Monster[1],1);
+        Kill[1]++;
+    }
+    if(fid&&Step[1]<100){
         if(RateCalc(40)) Step[1]+=20,prtt("你成功探索了 20% 的地图\n");
-        else Step[1]+=10,PRTL_CRITICAL_SECTION_DEBUG("你成功探索了 10% 的地图\n");
-        ps(1);
+        else Step[1]+=10,prtt("你成功探索了 10% 的地图\n");
+        Step[1]=min(Step[1],100);
     }
-    if(x=='b'){
-        if(RateCalc(90)){
-            Sprtt("你遭遇了史莱姆！\n",0.08); ps(1.5);
-            Battle(P1,Monster[1],1);
-            Kill[1]++; 
-        }
-    }
+    
+    ps(1);
+
     if(Step[1]>=100){
         if(Boss1()){system("cls"); Sprtt("你成功攻略了荒芜之地外围",0.05); ps(2); return 0;}
-    }*/
+    }
+    //Wait();
     return 1;
 }
 #pragma endregion
@@ -666,7 +685,7 @@ HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
 #pragma endregion
 
 	char c; srand(time(0)); Build_Project();
-goto test3;
+goto test4;
 headd:
 #pragma region //封面
     Reset_Map(); Build_Map();
@@ -694,8 +713,9 @@ test3:
     Reset_Map(); 
     while(Chapter_1());
 #pragma endregion	
-    
-    
-	prtt("敬请期待后续\n"); Wait(); return 0;
+test4:
+    PrtColor(0x07);
+	prtt("\n   敬请期待后续!!!\n"); 
+    Wait(); 
     return 0;
 }
