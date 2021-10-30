@@ -1,13 +1,14 @@
 /*
  * @Author: Wannabtl
  * @Date: 2021-10-28 12:08:30
- * @LastEditTime: 2021-10-30 10:43:06
+ * @LastEditTime: 2021-10-30 12:31:56
  * @Description: 
 */
 #include<ctime>
 #include<bits/stdc++.h>
 #include<windows.h>
 #include<conio.h>
+
 #define prt printf
 #define ps(i) Sleep(i*1000)
 #define gc _getch()
@@ -17,10 +18,22 @@ using namespace std;
 bool Flag=0; 
 int Step[10];
 int Kill[10];
+void cls(){ 
+    COORD pos; 
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleCursorPosition(hOut, pos);
+    for(int i=0;i<100;i++){ 
+        for(int j=0;j<100;j++) putchar(' '); 
+        pc('\n'); 
+    } 
+    pos.X = 0; pos.Y = 0; 
+    SetConsoleCursorPosition(hOut, pos); 
+}
 struct Player{
 	string name;
     string atk_style; string dead_style;
     string peace_style[5]; 
+    int x,y;
 	int Hp,MaxHp;
 	int Mp,MaxMp;
 	int Atk,AtkRate;
@@ -32,10 +45,10 @@ struct Player{
 	Player(){ Use=0; }
 }P1,Monster[20],Buff[20],Weapon[20];
 /*
-1:æµæ°´æ³•æ–
-2:é­”é¾™ç”²èƒ„
-3:è‡ªç”±æ–—ç¯·
-4:é˜è¿°è€…&é€æš—è€…
+1:Á÷Ë®·¨ÕÈ
+2:Ä§Áú¼×ëÐ
+3:×ÔÓÉ¶·Åñ
+4:²ûÊöÕß&Öð°µÕß
 5:
 6:
 7:
@@ -73,7 +86,7 @@ void AddChar(Player &a,Player b){
 }
 
 void Wait(){
-	prt("æŒ‰Zé”®ç»§ç»­...\n"); 
+	prt("°´Z¼ü¼ÌÐø...\n"); 
 	char c; Read(c,'z','z');
 	system("cls");
 }
@@ -100,9 +113,9 @@ void Sprtt(string s,double x){
 }
 string GetTime(){
 	time_t timep;
-    time (&timep); //èŽ·å–time_tç±»åž‹çš„å½“å‰æ—¶é—´
+    time (&timep); //»ñÈ¡time_tÀàÐÍµÄµ±Ç°Ê±¼ä
     char tmp[64];
-    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S",localtime(&timep) );//å¯¹æ—¥æœŸå’Œæ—¶é—´è¿›è¡Œæ ¼å¼åŒ–
+    strftime(tmp, sizeof(tmp), "%Y-%m-%d %H:%M:%S",localtime(&timep) );//¶ÔÈÕÆÚºÍÊ±¼ä½øÐÐ¸ñÊ½»¯
     return tmp;
 }
 void GoDead(){
@@ -115,35 +128,36 @@ void SetChar(Player &a,string name,int hp,int mp,int atk,int atkrt,int def,int c
 	a.Atk=atk; a.AtkRate=atkrt;
 	a.Def=def; a.CritD=critdamage; a.CritR=critrate; 
 }
+
 void Build_Weapon(){
-    SetChar(Weapon[1],"æµæ°´æ³•æ–",150,150,0,0,0,0,10); 
+    SetChar(Weapon[1],"Á÷Ë®·¨ÕÈ",150,150,0,0,0,0,10); 
     Weapon[1].HpCost=0; Weapon[1].MpCost=80;
 
-    SetChar(Weapon[6],"å²èŽ±å§†ç²¾ç²¹",0,0,0,0,10,0,10);
+    SetChar(Weapon[6],"Ê·À³Ä·¾«´â",0,0,0,0,10,0,10);
     Weapon[6].HpCost=Weapon[6].MpCost=0;
 }
 void Build_Slime(){
     // HP MP ATK ATKRT DEF CRITDAMAGE CRITRATE
-    SetChar(Monster[1],"å²èŽ±å§†",100,0,20,100,20,0,0);
+    SetChar(Monster[1],"Ê·À³Ä·",100,0,20,100,20,0,0);
     Monster[1].peace_style_num=4;
-    Monster[1].peace_style[0]="è¿™åªå°å°çš„å²èŽ±å§†åªå…³å¿ƒè‡ªå·±è„šä¸‹çš„èŠ±èŠ±";
-    Monster[1].peace_style[1]="è¿™åªå°å°çš„å²èŽ±å§†å·å·åœ°æ‰“é‡äº†ä½ ä¸€çœ¼";
-    Monster[1].peace_style[2]="è¿™åªå²èŽ±å§†æ‰‘é€šæ‰‘é€šåœ°è¹¦è·¶ç€";
-    Monster[1].peace_style[3]="è¿™åªå²èŽ±å§†å¤§å£åœ°åƒç€è‰";
+    Monster[1].peace_style[0]="ÕâÖ»Ð¡Ð¡µÄÊ·À³Ä·Ö»¹ØÐÄ×Ô¼º½ÅÏÂµÄ»¨»¨";
+    Monster[1].peace_style[1]="ÕâÖ»Ð¡Ð¡µÄÊ·À³Ä·ÍµÍµµØ´òÁ¿ÁËÄãÒ»ÑÛ";
+    Monster[1].peace_style[2]="ÕâÖ»Ê·À³Ä·ÆËÍ¨ÆËÍ¨µØ±ÄÛQ×Å";
+    Monster[1].peace_style[3]="ÕâÖ»Ê·À³Ä·´ó¿ÚµØ³Ô×Å²Ý";
    
-    Monster[1].atk_style="ç‹ ç‹ åœ°æ’žå‡»ä½ çš„é“ ç”²";
+    Monster[1].atk_style="ºÝºÝµØ×²»÷ÄãµÄîø¼×";
 
-    Monster[1].dead_style="å²èŽ±å§†ç­‹ç–²åŠ›å°½åœ°å€’ä¸‹äº†";
+    Monster[1].dead_style="Ê·À³Ä·½îÆ£Á¦¾¡µØµ¹ÏÂÁË";
     Monster[1].Drop=6;
 
-    SetChar(Monster[2],"ä¼ªÂ·èŒçŽ‹",200,0,80,1000,100,200,10);
+    SetChar(Monster[2],"Î±¡¤ÃÈÍõ",200,0,80,1000,100,200,10);
     Monster[2].peace_style_num=2;
-    Monster[2].peace_style[0]="èŒçŽ‹å¥½å¥‡åœ°æ‰“é‡ç€ä½ ";
-    Monster[2].peace_style[1]="èŒçŽ‹ç¡ç€äº†";
+    Monster[2].peace_style[0]="ÃÈÍõºÃÆæµØ´òÁ¿×ÅÄã";
+    Monster[2].peace_style[1]="ÃÈÍõË¯×ÅÁË";
    
-    Monster[2].atk_style="ä½¿ç”¨äº†é¥¿é¾™å’†å“®";
+    Monster[2].atk_style="Ê¹ÓÃÁË¶öÁúÅØÏø";
 
-    Monster[2].dead_style="åœ¨ä¸€é˜µæƒ¨å«ä¸­ï¼ŒèŒçŽ‹å€’äº†";
+    Monster[2].dead_style="ÔÚÒ»Õó²Ò½ÐÖÐ£¬ÃÈÍõµ¹ÁË";
     Monster[2].Drop=6;
 }
 
@@ -154,27 +168,15 @@ void Build_Project(){
     Build_Weapon();
     Build_Slime();
 }
+
+#pragma region //Õ½¶·¼ÆËã
+
 bool RateCalc(int x){
     if(x>=100) return 1;
     int xx=rand()%100;
     if(xx<=x) return 1;
     return 0;
 }
-//åˆ¶å›¾
-    int Martix[100][100];
-    void Reset_Map(){
-        for(int i=1;i<=11;i++)
-        for(int j=1;j<=21;j++){
-            if(i%2) pc('-');
-            else {
-                switch(j%4){
-                    case 0:
-                }
-            }
-            if(j==21) pc('\n');
-        }
-        return ;
-    }
 
 int Calcdmg(Player a,Player b){
     double h=1.*a.Atk;
@@ -191,53 +193,53 @@ void Run_Weapon(Player &a,Player &b,int id){
     Player w=Weapon[id];
     a.Mp-=w.MpCost;
     if(a.Mp<0){
-        Sprtt("é­”åŠ›ä¸è¶³ï¼Œä½ å—åˆ°äº†æ³•æœ¯åå™¬\n",0.03);
+        Sprtt("Ä§Á¦²»×ã£¬ÄãÊÜµ½ÁË·¨Êõ·´ÊÉ\n",0.03);
         a.Mp=0;
         a.Hp/=2;
         return ;
     }
     a.Hp-=w.HpCost;
     if(a.Hp<0){
-        Sprtt("æ„šè ¢çš„å‹‡è€…å†ä¸€æ¬¡æ­»åœ¨äº†ä»–çš„è‡ªå¤§ä¹‹ä¸‹\n",0.03);
+        Sprtt("ÓÞ´ÀµÄÓÂÕßÔÙÒ»´ÎËÀÔÚÁËËûµÄ×Ô´óÖ®ÏÂ\n",0.03);
         GoDead();
     }
     if(id==1){
-        prt("è¯·é€‰æ‹©æ–½æ³•ç›®æ ‡\nA.");cout<<a.name; prt("     B."); cout<<b.name<<endl;
+        prt("ÇëÑ¡ÔñÊ©·¨Ä¿±ê\nA.");cout<<a.name; prt("     B."); cout<<b.name<<endl;
         char xx; Read(xx,'a','b');
         if(xx=='a'){
             int x=min(Calcdmgself(a),a.MaxHp-a.Hp);
-            prt("ä½ å¯¹è‡ªå·±ä½¿ç”¨äº† å’å¹!");
-            if(x>a.Atk) Sprtt(" å¹¶è§¦å‘äº†é»‘é—ªï¼ï¼ï¼",0.05);
+            prt("Äã¶Ô×Ô¼ºÊ¹ÓÃÁË Ó½Ì¾!");
+            if(x>a.Atk) Sprtt(" ²¢´¥·¢ÁËºÚÉÁ£¡£¡£¡",0.05);
             pc('\n');
-            prt("ä½ çš„ç”Ÿå‘½æ¢å¤äº† %d\n",x);
+            prt("ÄãµÄÉúÃü»Ö¸´ÁË %d\n",x);
             a.Hp+=x;
         }
         else {
             int x=min(Calcdmgself(a),b.MaxHp-b.Hp);
-            prt("ä½ å¯¹"); cout<<b.name; prt("ä½¿ç”¨äº† å’å¹!");
-            if(x>a.Atk) Sprtt(" å¹¶è§¦å‘äº†é»‘é—ªï¼ï¼ï¼",0.05);
+            prt("Äã¶Ô"); cout<<b.name; prt("Ê¹ÓÃÁË Ó½Ì¾!");
+            if(x>a.Atk) Sprtt(" ²¢´¥·¢ÁËºÚÉÁ£¡£¡£¡",0.05);
             pc('\n');
-            cout<<b.name; prt("çš„ç”Ÿå‘½æ¢å¤äº† %d\n",x);
+            cout<<b.name; prt("µÄÉúÃü»Ö¸´ÁË %d\n",x);
             b.Hp+=x;
         }
     }
     if(id==6){
-        prt("è¯·é€‰æ‹©æ–½æ³•ç›®æ ‡\nA.");cout<<a.name; prt("     B."); cout<<b.name<<endl;
+        prt("ÇëÑ¡ÔñÊ©·¨Ä¿±ê\nA.");cout<<a.name; prt("     B."); cout<<b.name<<endl;
         char xx; Read(xx,'a','b');
         if(xx=='a'){
             int x=min(Calcdmgself(Monster[1]),a.MaxHp-a.Hp);
-            prt("ä½ å¯¹è‡ªå·±ä½¿ç”¨äº† å²èŽ±å§†ä¹‹å…‰ !");
-            if(x>Monster[1].Atk) Sprtt(" å¹¶è§¦å‘äº†é»‘é—ªï¼ï¼ï¼",0.05);
+            prt("Äã¶Ô×Ô¼ºÊ¹ÓÃÁË Ê·À³Ä·Ö®¹â !");
+            if(x>Monster[1].Atk) Sprtt(" ²¢´¥·¢ÁËºÚÉÁ£¡£¡£¡",0.05);
             pc('\n');
-            prt("ä½ çš„ç”Ÿå‘½æ¢å¤äº† %d\n",x);
+            prt("ÄãµÄÉúÃü»Ö¸´ÁË %d\n",x);
             a.Hp+=x;
         }
         else {
             int x=min(Calcdmgself(Monster[1]),b.MaxHp-b.Hp);
-            prt("ä½ å¯¹"); cout<<b.name; prt("ä½¿ç”¨äº† å²èŽ±å§†ä¹‹å…‰ !");
-            if(x>Monster[1].Atk) Sprtt(" å¹¶è§¦å‘äº†é»‘é—ªï¼ï¼ï¼",0.05);
+            prt("Äã¶Ô"); cout<<b.name; prt("Ê¹ÓÃÁË Ê·À³Ä·Ö®¹â !");
+            if(x>Monster[1].Atk) Sprtt(" ²¢´¥·¢ÁËºÚÉÁ£¡£¡£¡",0.05);
             pc('\n');
-            cout<<b.name; prt("çš„ç”Ÿå‘½æ¢å¤äº† %d\n",x);
+            cout<<b.name; prt("µÄÉúÃü»Ö¸´ÁË %d\n",x);
             b.Hp+=x;
         }
     }
@@ -245,17 +247,17 @@ void Run_Weapon(Player &a,Player &b,int id){
 }
 void Battle(Player a,Player b,int idx){
     system("cls");
-    Head('-',40,"æˆ˜æ–—");
+    Head('-',40,"Õ½¶·");
     PutChar(P1);
     bool flg=0;
     for(int i=1;i<=200&&a.Hp&&b.Hp;i++){
 ReChoose:
-        prt("å›žåˆï¼š%d/30\n",i);
+        prt("»ØºÏ£º%d/30\n",i);
         if(i>30){
-            prt("ç–²åŠ³ï¼ä½ å—åˆ°äº†%dä¼¤å®³\n",1<<(i-30));
+            prt("Æ£ÀÍ£¡ÄãÊÜµ½ÁË%dÉËº¦\n",1<<(i-30));
             a.Hp-=1<<i-30;
         }
-        prt("A.æ”»å‡»  B.è§‚å¯Ÿ  C.å†¥æƒ³  D.ç‰©å“\n");
+        prt("A.¹¥»÷  B.¹Û²ì  C.Ú¤Ïë  D.ÎïÆ·\n");
         char k;
         Read(k,'a','d');
         Slip(1);
@@ -264,21 +266,21 @@ Rebag:
             int cnt=0;
             for(int i=1;i<=15;i++)
             if(Weapon[i].Use>0) cnt+=Weapon[i].Use;
-            Head('-',40,"ç‰©å“");
+            Head('-',40,"ÎïÆ·");
             if(cnt==0)
-             Sprtt("è¿™é‡Œç©ºç©ºå¦‚ä¹Ÿï¼Œä»€ä¹ˆå¥½ä¸œè¥¿ä¹Ÿæ²¡æœ‰\n",0.03);
+             Sprtt("ÕâÀï¿Õ¿ÕÈçÒ²£¬Ê²Ã´ºÃ¶«Î÷Ò²Ã»ÓÐ\n",0.03);
             if(cnt<=10&&cnt>0)
-             Sprtt("ä½ é¼“æ£ç€æ‰‹ä¸­ä¸å¤šçš„ç‰©å“ï¼Œè¿™é‡Œæœ‰:\n",0.03);
+             Sprtt("Äã¹Äµ·×ÅÊÖÖÐ²»¶àµÄÎïÆ·£¬ÕâÀïÓÐ:\n",0.03);
             if(cnt>=10)
-             Sprtt("ä½ æŸ¥çœ‹ç€è‡ªå·±ä¸°ç¡•çš„è—å“ï¼Œä½ å·²ç»æ˜¯ä¸€ä¸ªåˆæ ¼çš„æ”¶è—å®¶äº†\n",0.03);
+             Sprtt("Äã²é¿´×Å×Ô¼º·áË¶µÄ²ØÆ·£¬ÄãÒÑ¾­ÊÇÒ»¸öºÏ¸ñµÄÊÕ²Ø¼ÒÁË\n",0.03);
             for(int i=1;i<=15;i++)
              if(Weapon[i].Use>0) cout<<(char)('A'+i-1)<<'.'<<Weapon[i].name<<": x"<<Weapon[i].Use<<endl;
-            prt("Z.å…³ä¸ŠèƒŒåŒ…\n");
+            prt("Z.¹ØÉÏ±³°ü\n");
             char xx;
             Read(xx,'a','z');
             if(xx=='z') goto ReChoose;
             if(!Weapon[xx-'a'+1].Use){
-                prt("å¾ˆæŠ±æ­‰ï¼Œæ‚¨å°šæœªæ‹¥æœ‰è¿™æ ·çš„ç‰©å“");
+                prt("ºÜ±§Ç¸£¬ÄúÉÐÎ´ÓµÓÐÕâÑùµÄÎïÆ·");
                 goto Rebag;
             }
             if(Weapon[xx-'a'+1].Use){
@@ -288,24 +290,24 @@ Rebag:
             }
         }
         if(k=='c'){
-            prt("é—­ä¸ŠåŒçœ¼ æ”¾ç©ºçµé­‚\n");
+            prt("±ÕÉÏË«ÑÛ ·Å¿ÕÁé»ê\n");
             a.Mp+=a.MaxMp/5;
             a.Mp=min(a.Mp,a.MaxMp);
             a.Hp+=a.MaxHp/10;
             a.Hp=min(a.Hp,a.MaxHp);
-            prt("ä½ çš„Mpæ¢å¤åˆ° %d/%d\n",a.Mp,a.MaxMp);
-            prt("ä½ çš„Hpæ¢å¤åˆ° %d/%d\n",a.Hp,a.MaxHp);
+            prt("ÄãµÄMp»Ö¸´µ½ %d/%d\n",a.Mp,a.MaxMp);
+            prt("ÄãµÄHp»Ö¸´µ½ %d/%d\n",a.Hp,a.MaxHp);
         }
         if(k=='a'){
             int dmg=Calcdmg(a,b);
-            prt("ä½ æŒ¥å‰‘æ”»å‡»äº† "); cout<<b.name<<endl;
-            if(dmg>a.Atk) Sprtt(" å¹¶è§¦å‘é»‘é—ª!!! ",0.05);
-            if(dmg==0) Sprtt("å´è¢«é—ªå¼€äº†ï¼",0.05);
+            prt("Äã»Ó½£¹¥»÷ÁË "); cout<<b.name<<endl;
+            if(dmg>a.Atk) Sprtt(" ²¢´¥·¢ºÚÉÁ!!! ",0.05);
+            if(dmg==0) Sprtt("È´±»ÉÁ¿ªÁË£¡",0.05);
             dmg=min(dmg,b.Hp); b.Hp-=dmg;
-            prt("é€ æˆäº† %d ä¼¤å®³\n",dmg);
+            prt("Ôì³ÉÁË %d ÉËº¦\n",dmg);
             if(!flg){
                 flg=1;
-                prt("ä½ æ¿€æ€’äº†"); cout<<b.name<<endl;
+                prt("Äã¼¤Å­ÁË"); cout<<b.name<<endl;
             }
         }
         if(k=='b'){
@@ -313,21 +315,21 @@ Rebag:
             PutChar(b);
             if(b.Def){
                 b.Def=max(0,b.Def-a.Defatk);
-                cout<<b.name; prt("çš„é—ªé¿èƒ½åŠ›ä¸‹é™ä¸º %d %%\n",b.Def);
+                cout<<b.name; prt("µÄÉÁ±ÜÄÜÁ¦ÏÂ½µÎª %d %%\n",b.Def);
             }
         }
         if(i>30){
-            prt("ç–²åŠ³ï¼"); cout<<b.name; prt("å—åˆ°äº†%dä¼¤å®³\n",1<<(i-30));
+            prt("Æ£ÀÍ£¡"); cout<<b.name; prt("ÊÜµ½ÁË%dÉËº¦\n",1<<(i-30));
             b.Hp-=1<<i-30;
         }
         if(!b.Hp) break ;
         if(flg){
             int dmg=Calcdmg(b,a);
             cout<<b.name<<b.atk_style;
-            if(dmg>a.Atk) Sprtt(" å¹¶è§¦å‘é»‘é—ª! ",0.05);
-            if(dmg==0) Sprtt("å´è¢«é—ªå¼€äº†ï¼",0.05);
+            if(dmg>a.Atk) Sprtt(" ²¢´¥·¢ºÚÉÁ! ",0.05);
+            if(dmg==0) Sprtt("È´±»ÉÁ¿ªÁË£¡",0.05);
             dmg=min(dmg,a.Hp); a.Hp-=dmg;
-            prt("é€ æˆäº† %d ä¼¤å®³\n",dmg);
+            prt("Ôì³ÉÁË %d ÉËº¦\n",dmg);
         }
         cout<<a.name; prt(" Hp:%d/%d     Mp:%d/%d     ",a.Hp,a.MaxHp,a.Mp,a.MaxMp);
         if(flg) cout<<b.name,prt(" Hp:%d",b.Hp);
@@ -336,7 +338,7 @@ Rebag:
    	if(!b.Hp){
         cout<<b.dead_style<<endl;
         if(RateCalc(20)){
-            prt("å¹¸è¿MAXï¼ï¼\n"); cout<<b.name; prt("æŽ‰è½äº†");
+            prt("ÐÒÔËMAX£¡£¡\n"); cout<<b.name; prt("µôÂäÁË");
             cout<<Weapon[b.Drop].name; prt("x1\n");
             Weapon[b.Drop].Use++;
         }
@@ -347,41 +349,84 @@ Rebag:
     if(!a.Hp) GoDead();
 
 }
+#pragma endregion 
+
+#pragma region //ÖÆÍ¼
+
+    int Martix[100][100];
+    void Reset_Map(){
+        memset(Martix,0,sizeof(Martix));
+        Martix[3][3]=9;
+        P1.x=P1.y=3;
+    }
+    void Build_Map(){
+        for(int i=1;i<=11;i++)
+        for(int j=1;j<=21;j++){
+            if(i%2) pc('-');
+            else {
+                switch(j%4){
+                    case 0: pc(' '); break ;
+                    case 1: pc('|'); break ;
+                    case 2: pc(' '); break ;
+                    case 3: 
+                        int x=(i+1)/2;
+                        int y=(j+1)/4;
+                        if(Martix[x][y]==1) pc(' ');
+                        else if(Martix[x][y]==2) pc('O');
+                        else if(Martix[x][y]==3) pc('!');
+                        else if(Martix[x][y]%10==9) pc('P');
+                        else pc('*');
+                    break;
+                }
+            }
+            if(j==21) pc('\n');
+        }
+        return ;
+    }
+    bool Check(int x,int y){
+        if(x<1||y<1) return 0;
+        if(x>5||y>5) return 0;
+        return 1;
+    }
+//
+#pragma endregion 
+
+#pragma region //ÐòÑÔ
 void ProText(){
 	system("cls");
-	Head('-',50,"åºç« ");
+	Head('-',50,"ÐòÕÂ");
 //goto test1;
-	prtt("å…¬å…ƒ2021å¹´\n"); //Sleep(1000);
-	prtt("éª‘å£«é•¿é˜¿æè²æ–¯Â·å› ç‰¹åˆ©æ·ç‰¹é©±é€æ¶é¾™æ™®èŽ±å°”\n");// Sleep(1000);
-	prtt("é¥±ç»æ¶é¾™æŠ˜ç£¨çš„åœ£åŸŽäººæ°‘ç»ˆäºŽé‡èŽ·å®‰å®\n");// Sleep(1000);
-	prtt("è¿™åº§æ¢å¼˜çš„å¤è€åŸŽå¸‚å†ä¸€æ¬¡ç››æ»¡æ¬¢å£°ç¬‘è¯­\n"); Sleep(2000);
+	prtt("¹«Ôª2021Äê\n"); //Sleep(1000);
+	prtt("ÆïÊ¿³¤°¢Ìá·ÆË¹¡¤ÒòÌØÀû½ÝÌØÇýÖð¶ñÁúÆÕÀ³¶û\n");// Sleep(1000);
+	prtt("±¥¾­¶ñÁúÕÛÄ¥µÄÊ¥³ÇÈËÃñÖÕÓÚÖØ»ñ°²Äþ\n");// Sleep(1000);
+	prtt("Õâ×ù»ÖºëµÄ¹ÅÀÏ³ÇÊÐÔÙÒ»´ÎÊ¢Âú»¶ÉùÐ¦Óï\n"); Sleep(2000);
 	Slip(2); 
-	prtt("å…¬å…ƒ2086å¹´\n");// Sleep(1000); 
-	prtt("å…­åå¹´ï¼Œéª‘å£«é•¿å¯¸æ­¥ä¸ç¦»å æ˜Ÿå¡”\n"); //ps(1);
-	prtt("æœ‰äººè¯´ä»–ä¿¯çž°ç€åœ£åŸŽå­æ°‘çš„å’Œå¹³ï¼Œäº«å—ç€ä»–æ‰€å®ˆæŠ¤çš„ä¸€åˆ‡\n");// ps(1.5);
-	prtt("æœ‰äººè¯´ä»–è§†çº¿ç©¿è¿‡å·å³¨çš„åœ£åŸŽé«˜å¢™ï¼Œæ¸¸å¼‹åœ¨ä¸è§å¤©æ—¥çš„è’èŠœä¹‹åœ°ï¼Œå¯»æ‰¾ç€é‚£æ¡é‡ä¼¤çš„å·¨é¾™\n"); ps(2);
+	prtt("¹«Ôª2086Äê\n");// Sleep(1000); 
+	prtt("ÁùÊ®Äê£¬ÆïÊ¿³¤´ç²½²»ÀëÕ¼ÐÇËþ\n"); //ps(1);
+	prtt("ÓÐÈËËµËû¸©î«×ÅÊ¥³Ç×ÓÃñµÄºÍÆ½£¬ÏíÊÜ×ÅËûËùÊØ»¤µÄÒ»ÇÐ\n");// ps(1.5);
+	prtt("ÓÐÈËËµËûÊÓÏß´©¹ýÎ¡¶ëµÄÊ¥³Ç¸ßÇ½£¬ÓÎß®ÔÚ²»¼ûÌìÈÕµÄ»ÄÎßÖ®µØ£¬Ñ°ÕÒ×ÅÄÇÌõÖØÉËµÄ¾ÞÁú\n"); ps(2);
 	Slip(1);
-	prtt("å…¥å†¬ï¼Œå¤§é›ªå‘¼å•¸\n");// ps(1);
-	prtt("åœ¨èŒ«èŒ«å¤§é›ªä¸Žæ— è¾¹æ— é™…çš„é»‘æš—ä¸­\n");// ps(1);
-	prtt("å æ˜Ÿå¡”é‡Œä¸€å¦‚æ—¢å¾€é—ªè€€çš„åœ£å‰‘æˆä¸ºåœ£åŸŽäººæ°‘çœ¼ä¸­æœ€åŽçš„ç¯å¡”\n"); //ps(1);
-	prtt("åˆ¹é‚£ï¼Œä¼´éšç€è½°å¤©çš„å·¨å“\n");
-	prtt("ä¸€é“é—ªç”µç‹°ç‹žåœ°æ’•å¼€é»‘å¤œ\n"); 
-//	prtt("å´©è£‚çš„å…‰èŠ’ä½¿åœ£å‰‘ä¹Ÿä¸ºä¹‹é»¯æ·¡\n"); ps(3);
+	prtt("Èë¶¬£¬´óÑ©ºôÐ¥\n");// ps(1);
+	prtt("ÔÚÃ£Ã£´óÑ©ÓëÎÞ±ßÎÞ¼ÊµÄºÚ°µÖÐ\n");// ps(1);
+	prtt("Õ¼ÐÇËþÀïÒ»Èç¼ÈÍùÉÁÒ«µÄÊ¥½£³ÉÎªÊ¥³ÇÈËÃñÑÛÖÐ×îºóµÄµÆËþ\n"); //ps(1);
+	prtt("É²ÄÇ£¬°éËæ×ÅºäÌìµÄ¾ÞÏì\n");
+	prtt("Ò»µÀÉÁµçÕøÄüµØËº¿ªºÚÒ¹\n"); 
+//	prtt("±ÀÁÑµÄ¹âÃ¢Ê¹Ê¥½£Ò²ÎªÖ®÷öµ­\n"); ps(3);
 	Slip(1);
-	prtt("åœ¨è¿™ä¸€çž¬é—´\nèŽ«åçš„ææƒ§çˆ¬ä¸Šæ¯ä¸€ä¸ªåœ£åŸŽäººæ°‘çš„å¿ƒå¤´\n"); 
-	prtt("å æ˜Ÿå¡”ä¸­çªå…€å“èµ·å°–é”çš„å·è§’\n"); ps(1);
+	prtt("ÔÚÕâÒ»Ë²¼ä\nÄªÃûµÄ¿Ö¾åÅÀÉÏÃ¿Ò»¸öÊ¥³ÇÈËÃñµÄÐÄÍ·\n"); 
+	prtt("Õ¼ÐÇËþÖÐÍ»Ø£ÏìÆð¼âÈñµÄºÅ½Ç\n"); ps(1);
 	Slip(1);
-	prtt("éšä¹‹è€Œæ¥çš„æ˜¯\n");// ps(1);
-	prtt("è’èŠœä¹‹åœ°æ·±å¤„é‚£è±¡å¾å™©æ¢¦çš„ææ€–å’†å“®...\n"); ps(2);
+	prtt("ËæÖ®¶øÀ´µÄÊÇ\n");// ps(1);
+	prtt("»ÄÎßÖ®µØÉî´¦ÄÇÏóÕ÷Ø¬ÃÎµÄ¿Ö²ÀÅØÏø...\n"); ps(2);
 	Slip(2);
 	
 	Wait();
 test1:	
 	Slip(2); 
-	prtt("åœ¨éœ‡æ…‘äººé­‚çš„å’†å“®å£°ä¸­\n"); //ps(2);
-	prtt("åœ£åŸŽçš„é«˜é˜¶ä¸»æ•™ç›˜ååœ¨å€’ä¸‹çš„è€€éª‘å£«å‘¨å›´\n"); //ps(2);
-	prtt("è€Œåœ£å‰‘æ‚¬æµ®ç©ºä¸­ï¼Œé—ªè€€\n"); //ps(2);
-    prtt("ä¸»æ•™ä½Žå£°é»˜ç¥·ï¼Œå‘¼å”¤è¿œæ–¹çš„çµé­‚\n"); //ps(2);
+	prtt("ÔÚÕðÉåÈË»êµÄÅØÏøÉùÖÐ\n"); //ps(2);
+	prtt("Ê¥³ÇµÄ¸ß½×Ö÷½ÌÅÌ×øÔÚµ¹ÏÂµÄÒ«ÆïÊ¿ÖÜÎ§\n"); //ps(2);
+	prtt("¶øÊ¥½£Ðü¸¡¿ÕÖÐ£¬ÉÁÒ«\n"); //ps(2);
+    prtt("Ö÷½ÌµÍÉùÄ¬µ»£¬ºô»½Ô¶·½µÄÁé»ê\n"); //ps(2);
     Slip(3);
     Wait();
 
@@ -423,34 +468,37 @@ test1:
 	system("cls");
 	Slip(1); Sprtt("Link Start!\n",0.5); Slip(3); Wait();
 	
-	prtt("ä»Šå¹´æ˜¯æ¶é¾™è‹é†’ä»¥æ¥çš„ç¬¬ä¸‰å¹´\n"); ps(1);
-	prtt("åœ£åŸŽä¸Šä¸‹æ—¥æ—¥å¤œå¤œæˆ’å¤‡ç€æ¶é¾™çš„çªè¢­\n"); ps(1); 
-	prtt("è€Œä»Šå¤©æ˜¯ä½ ä½œä¸ºå‹‡è€…è®­ç»ƒçš„æœ€åŽä¸€å¤©\n"); ps(1);
-	prtt("æ˜Žå¤©ä½ å°†è·Ÿéšè°ƒæŸ¥å…µå›¢ä¸€èµ·å‰å¾€è’èŠœä¹‹åœ°è®¨ä¼æ¶é¾™\n\n"); ps(1); 
-	prtt("ç„¶è€Œæ•™å®˜Sufunè¿œè¿œå«åœäº†è®­ç»ƒä¸­çš„ä½ ï¼Œåœ¨æ•™å®˜å®¤ä¸­æŒ¥æ‰‹\n"); ps(1); 
+	prtt("½ñÄêÊÇ¶ñÁúËÕÐÑÒÔÀ´µÄµÚÈýÄê\n"); ps(1);
+	prtt("Ê¥³ÇÉÏÏÂÈÕÈÕÒ¹Ò¹½ä±¸×Å¶ñÁúµÄÍ»Ï®\n"); ps(1); 
+	prtt("¶ø½ñÌìÊÇÄã×÷ÎªÓÂÕßÑµÁ·µÄ×îºóÒ»Ìì\n"); ps(1);
+	prtt("Ã÷ÌìÄã½«¸úËæµ÷²é±øÍÅÒ»ÆðÇ°Íù»ÄÎßÖ®µØÌÖ·¥¶ñÁú\n\n"); ps(1); 
+	prtt("È»¶ø½Ì¹ÙSufunÔ¶Ô¶½ÐÍ£ÁËÑµÁ·ÖÐµÄÄã£¬ÔÚ½Ì¹ÙÊÒÖÐ»ÓÊÖ\n"); ps(1); 
 	Slip(1); 
-	prt("A.å‰å¾€æ•™å®˜å®¤      B.ç»§ç»­è®­ç»ƒ\n");
+	prt("A.Ç°Íù½Ì¹ÙÊÒ      B.¼ÌÐøÑµÁ·\n");
 	Slip(1);
 	char c;
 	while(1){
 		c=gc; c=Dwn(c);
 		if(c=='a'||c=='b') break ;
 	} 
-	if(c=='a') prtt("å¸¦ç€ç–‘æƒ‘ä½ è¿ˆè¿›äº†æ•™å®˜å®¤çš„å¤§é—¨\n");
-	if(c=='b') prtt("å†¥å†¥ä¸­ä½ ä¸€é˜µå¿ƒæ‚¸,çœ¼å‰çœ©æ™•ï¼Œä¸‹ä¸€ç§’è‡ªå·±å·²ç»å‡ºçŽ°åœ¨äº†æ•™å®˜å®¤é‡Œ\n"),Flag=1;
+	if(c=='a') prtt("´ø×ÅÒÉ»óÄãÂõ½øÁË½Ì¹ÙÊÒµÄ´óÃÅ\n");
+	if(c=='b') prtt("Ú¤Ú¤ÖÐÄãÒ»ÕóÐÄ¼Â,ÑÛÇ°Ñ£ÔÎ£¬ÏÂÒ»Ãë×Ô¼ºÒÑ¾­³öÏÖÔÚÁË½Ì¹ÙÊÒÀï\n"),Flag=1;
 	ps(1);
-	prtt("â€œä¸‰å¹´æ¥ä½ æ˜¯æˆ‘å”¯ä¸€çœ‹é‡çš„äººâ€ï¼ŒSufunèƒŒå¯¹ç€ä½ æ‘†å¼„ç€æ¡Œä¸Šçš„å·«å¸ˆæ£‹ï¼Œâ€œä½ èº«ä¸Šæœ‰ç€åˆ«äººæ²¡æœ‰çš„å†³å¿ƒâ€\n");
-	prtt("â€œä»¥åŽåˆ©å¨å°”å°†è¾…å¯¼ä½ æˆä¸ºä¸€åçœŸæ­£çš„æˆ˜å£«â€ï¼ŒSufunæ‹¿èµ·äº†ä¸€æžšæ£‹å­ï¼Œä¸¾åœ¨ç©ºä¸­ç«¯è¯¦ç€\nâ€œè€Œæˆ‘ï¼Œä¹Ÿä¼šé€ä½ ä¸€ä»¶ç¤¼ç‰©â€,è¯´ç€ï¼ŒSufunæç¢Žé‚£è±¡ç‰™è‰²çš„æ£‹å­ï¼Œç´«å…‰åŒ…è£¹ç€å››æ•£çš„ç¢Žç‰‡\n");
-	prtt("è€Œæ¡Œä¸Šï¼Œæ£‹å­æ•£è½ï¼Œæ£‹ç›˜æ‚¬æµ®ï¼Œåœ¨ç›¸åŒçš„ç´«å…‰ä¸­ï¼Œæ£‹ç›˜å‘å†…åå¡Œï¼ŒåŒ–æˆæ·±ä¸è§åº•çš„æ¼©æ¶¡\n"); ps(1);
-	prtt("â€œèµ°å§ï¼ŒåŽ»è§è§é‚£äº›ä¹…è¿çš„è€æœ‹å‹â€, è¯éŸ³æœªè½Sufunå·²æ˜¯æ¶ˆå¤±åœ¨äº†æ¼©æ¶¡ä¹‹ä¸­\n");
-	prtt("ä½ æ— å¥ˆåœ°å¹äº†å£æ°”ï¼Œä¹Ÿæ˜¯æŠ¬è„šèµ°è¿›äº†æ¼©æ¶¡ä¹‹ä¸­\n");	 Wait();
+	prtt("¡°ÈýÄêÀ´ÄãÊÇÎÒÎ¨Ò»¿´ÖØµÄÈË¡±£¬Sufun±³¶Ô×ÅÄã°ÚÅª×Å×ÀÉÏµÄÎ×Ê¦Æå£¬¡°ÄãÉíÉÏÓÐ×Å±ðÈËÃ»ÓÐµÄ¾öÐÄ¡±\n");
+	prtt("¡°ÒÔºóÀûÍþ¶û½«¸¨µ¼Äã³ÉÎªÒ»ÃûÕæÕýµÄÕ½Ê¿¡±£¬SufunÄÃÆðÁËÒ»Ã¶Æå×Ó£¬¾ÙÔÚ¿ÕÖÐ¶ËÏê×Å\n¡°¶øÎÒ£¬Ò²»áËÍÄãÒ»¼þÀñÎï¡±,Ëµ×Å£¬SufunÄóËéÄÇÏóÑÀÉ«µÄÆå×Ó£¬×Ï¹â°ü¹ü×ÅËÄÉ¢µÄËéÆ¬\n");
+	prtt("¶ø×ÀÉÏ£¬Æå×ÓÉ¢Âä£¬ÆåÅÌÐü¸¡£¬ÔÚÏàÍ¬µÄ×Ï¹âÖÐ£¬ÆåÅÌÏòÄÚÌ®Ëú£¬»¯³ÉÉî²»¼ûµ×µÄäöÎÐ\n"); ps(1);
+	prtt("¡°×ß°É£¬È¥¼û¼ûÄÇÐ©¾ÃÎ¥µÄÀÏÅóÓÑ¡±, »°ÒôÎ´ÂäSufunÒÑÊÇÏûÊ§ÔÚÁËäöÎÐÖ®ÖÐ\n");
+	prtt("ÄãÎÞÄÎµØÌ¾ÁË¿ÚÆø£¬Ò²ÊÇÌ§½Å×ß½øÁËäöÎÐÖ®ÖÐ\n");	 Wait();
 }
+#pragma endregion 
+
+#pragma region //×°±¸Ñ¡Ôñ
 bool ChooseJobs(){
 
 	system("cls");
 	
-	prt("ä½ æ‰“é‡ç€é»‘æš—é‡Œçš„ä¸€åˆ‡ï¼Œå‘¨é­çš„æœ¨æž¶ä¸Šæ‘†æ”¾ç€å¸ƒæ»¡ç°å°˜çš„å¤ç‰©\n");
-	prt("A.æ‹¿èµ·æž¯æœ½çš„æ³•æ–\n"); // \nB.æ‹¿èµ·ç”Ÿé”ˆçš„åŒå‰‘\nC.æ‹¿èµ·ç ´çƒ‚çš„é•¿è¢\nD.æ‹¿èµ·\n");
+	prt("Äã´òÁ¿×ÅºÚ°µÀïµÄÒ»ÇÐ£¬ÖÜÔâµÄÄ¾¼ÜÉÏ°Ú·Å×Å²¼Âú»Ò³¾µÄ¹ÅÎï\n");
+	prt("A.ÄÃÆð¿ÝÐàµÄ·¨ÕÈ\n"); // \nB.ÄÃÆðÉúÐâµÄË«½£\nC.ÄÃÆðÆÆÀÃµÄ³¤ÅÛ\nD.ÄÃÆð\n");
 	char c;
 	while(1){
 		c=gc; c=Dwn(c); printf("%c\n",c);
@@ -459,13 +507,13 @@ bool ChooseJobs(){
 	if(c=='a'){
         system("cls");
         PutChar(P1); Slip(3);
-		prt("æµæ°´æ³•æ–\nåœ£åŸŽåˆ›ç«‹è€…ã€åŽŸå§‹ä¸»æ•™ä¼Šå…‹æ–¯æœ¬å¾·ä½¿ç”¨çš„ç¥ç¦æ³•æ–ï¼Œé•¶åµŒç€å¤±ä¼ å·²ä¹…çš„æ²»æ„ˆæ³•æœ¯ã€‚\n\nè£…å¤‡åŽæœ‰å¦‚ä¸‹æ•ˆæžœï¼š\n");
+		prt("Á÷Ë®·¨ÕÈ\nÊ¥³Ç´´Á¢Õß¡¢Ô­Ê¼Ö÷½ÌÒÁ¿ËË¹±¾µÂÊ¹ÓÃµÄ×£¸£·¨ÕÈ£¬ÏâÇ¶×ÅÊ§´«ÒÑ¾ÃµÄÖÎÓú·¨Êõ¡£\n\n×°±¸ºóÓÐÈçÏÂÐ§¹û£º\n");
 		prt("MaxHp+150       MaxHp+150\n");
         prt("Critrate+10%\n");
-        prt("\n\nç‰¹æ®ŠæŠ€èƒ½ï¼šå’å¹\n");
+        prt("\n\nÌØÊâ¼¼ÄÜ£ºÓ½Ì¾\n");
         prt("Cost:Mp-80\n");
-        prt("Effect:ä½¿ç›®æ ‡å›žå¤%dï¼ˆ100%% ATKï¼‰çš„ç”Ÿå‘½å€¼\n",P1.Atk);
-        prt("\n\nA.é€‰æ‹©       B.æ”¾ä¸‹\n");
+        prt("Effect:Ê¹Ä¿±ê»Ø¸´%d£¨100%% ATK£©µÄÉúÃüÖµ\n",P1.Atk);
+        prt("\n\nA.Ñ¡Ôñ       B.·ÅÏÂ\n");
         char x;
         while(1){
             x=gc; x=Dwn(x);
@@ -481,12 +529,15 @@ bool ChooseJobs(){
 
 	return 1;
 }
+#pragma endregion
+
+#pragma region //Chapter 1
 bool Boss1(){
-    Sprtt("ä½ é­é‡äº†è“è‰²å²èŽ±å§†çŽ‹ï¼",0.06); ps(1);
+    Sprtt("ÄãÔâÓöÁËÀ¶É«Ê·À³Ä·Íõ£¡",0.06); ps(1);
     Battle(P1,Monster[2],2);
     if(P1.Hp){
         Player b=Monster[2];
-        cout<<b.name; prt("æŽ‰è½äº†");
+        cout<<b.name; prt("µôÂäÁË");
         cout<<Weapon[b.Drop].name; prt("x3\n");
         Weapon[b.Drop].Use+=3;
         return 1;
@@ -495,85 +546,131 @@ bool Boss1(){
     return 1;
 }
 bool Chapter_1(){
-	
-    system("cls");
-    
-    Head('-',40,"è’èŠœä¹‹åœ°è¾¹å¢ƒ");
-    prt("æŽ¢ç´¢åº¦ %d %% \n\n",Step[1]);
-	prt("A.æ·±å…¥     B.å¾˜å¾Š\n");
+#pragma region //Êä³öÍ¼Ïñ
+    cls();
+    Head('-',40,"»ÄÎßÖ®µØ±ß¾³");
+    prt("Ì½Ë÷¶È %d %% \n\n",Step[1]);
+    Build_Map();
+#pragma endregion 
+
 	char x;
+    int xx=P1.x,yy=P1.y;
+movement:
     while(1){
         x=gc; x=Dwn(x);
-        if(x>='a'&&x<='b') break ;
+        if(x=='a'||x=='s'||x=='d'||x=='w') break ;
+    } 
+    switch(x){
+        case 'a': yy-=1; break ;
+        case 's': xx+=1; break ;
+        case 'd': yy+=1; break ;
+        case 'w': xx-=1; break ;
     }
+    
+    if(!Check(xx,yy)){
+        prtt("Äã×²ÉÏÁËÊÀ½ç±ÚÀÝ£¡£¡£¡\n");
+        if(!Flag){
+            prtt("ÊÀ½ç±ÚÀÝ¶ÔÄãÔì³ÉÁË 10 ÕæÊµÉËº¦£¡£¡£¡\n");
+            P1.Hp-=10;
+            if(!P1.Hp) GoDead();
+        }
+        goto movement;
+    }
+    if(x=='a'||x=='s'||x=='d'||x=='w'){
+        while(Martix[P1.x][P1.y]>=9) Martix[P1.x][P1.y]/=10;
+        if(!Martix[P1.x][P1.y]) Martix[P1.x][P1.y]=1;
+    }
+    Martix[xx][yy]=Martix[xx][yy]*10+9;
+    P1.x=xx; P1.y=yy; 
+#pragma region //Êä³öÍ¼Ïñ
+    system("cls");
+    Head('-',40,"»ÄÎßÖ®µØ±ß¾³");
+    prt("Ì½Ë÷¶È %d %% \n\n",Step[1]);
+    Build_Map();
+#pragma endregion 
+/*
     if(x=='a'){
         if(RateCalc(70)){
-            Sprtt("ä½ é­é‡äº†å²èŽ±å§†ï¼\n",0.08); ps(1.5);
+            Sprtt("ÄãÔâÓöÁËÊ·À³Ä·£¡\n",0.08); ps(1.5);
             Battle(P1,Monster[1],1);
             Kill[1]++;
         }
-        if(RateCalc(40)) Step[1]+=20,prt("ä½ æˆåŠŸæŽ¢ç´¢äº† 20%% çš„åœ°å›¾\n");
-        else Step[1]+=10,prt("ä½ æˆåŠŸæŽ¢ç´¢äº† 10%% çš„åœ°å›¾\n");
+        if(RateCalc(40)) Step[1]+=20,prtt("Äã³É¹¦Ì½Ë÷ÁË 20% µÄµØÍ¼\n");
+        else Step[1]+=10,PRTL_CRITICAL_SECTION_DEBUG("Äã³É¹¦Ì½Ë÷ÁË 10% µÄµØÍ¼\n");
         ps(1);
     }
     if(x=='b'){
         if(RateCalc(90)){
-            Sprtt("ä½ é­é‡äº†å²èŽ±å§†ï¼\n",0.08); ps(1.5);
+            Sprtt("ÄãÔâÓöÁËÊ·À³Ä·£¡\n",0.08); ps(1.5);
             Battle(P1,Monster[1],1);
             Kill[1]++; 
         }
     }
     if(Step[1]>=100){
-        if(Boss1()){system("cls"); Sprtt("ä½ æˆåŠŸæ”»ç•¥äº†è’èŠœä¹‹åœ°å¤–å›´",0.05); ps(2); return 0;}
-    }
+        if(Boss1()){system("cls"); Sprtt("Äã³É¹¦¹¥ÂÔÁË»ÄÎßÖ®µØÍâÎ§",0.05); ps(2); return 0;}
+    }*/
     return 1;
 }
+#pragma endregion
+
+#pragma region //°æ±¾ºÅ
 void VersionPut(){
 Sprtt("=========================================\n",0.03);
 Sprtt("Version : 1.0.0 (Origin Version)\n",0.03);
 Sprtt("Updata Date : 2021-10-29 00:03:21\n",0.03);
 Sprtt("Updata Content :\n",0.03);
-Sprtt("  1.å®Œæˆäº†Player vs Slime \n",0.03);
-Sprtt("  2.è®¾ç«‹æ¸¸æˆæ¡†æž¶\n",0.03);
-Sprtt("  3.è®¾ç«‹æ•…äº‹èƒŒæ™¯\n",0.03);
-Sprtt("  4.æž„æƒ³äº†æˆ˜æ–—çŽ¯å¢ƒ\n",0.03);
-Sprtt("  5.å®žçŽ°äº†æ”»å‡»å’Œæˆ˜èƒœ å²èŽ±å§†\n",0.03);
-Sprtt("  6.å®Œæˆäº†ç¬¬ä¸€ä»¶è£…å¤‡ï¼š æµæ°´æ³•æ–\n",0.03);
-Sprtt("  7.å®žçŽ°äº†æš´å‡»æœºåˆ¶ \n",0.03);
+Sprtt("  1.Íê³ÉÁËPlayer vs Slime \n",0.03);
+Sprtt("  2.ÉèÁ¢ÓÎÏ·¿ò¼Ü\n",0.03);
+Sprtt("  3.ÉèÁ¢¹ÊÊÂ±³¾°\n",0.03);
+Sprtt("  4.¹¹ÏëÁËÕ½¶·»·¾³\n",0.03);
+Sprtt("  5.ÊµÏÖÁË¹¥»÷ºÍÕ½Ê¤ Ê·À³Ä·\n",0.03);
+Sprtt("  6.Íê³ÉÁËµÚÒ»¼þ×°±¸£º Á÷Ë®·¨ÕÈ\n",0.03);
+Sprtt("  7.ÊµÏÖÁË±©»÷»úÖÆ \n",0.03);
 Sprtt("=========================================\n",0.03);
 Sprtt("=========================================\n",0.03);
-Sprtt("Version ï¼š 1.0.2 \n",0.03);
+Sprtt("Version £º 1.0.2 \n",0.03);
 Sprtt("Updata Date : 2021-10-29 18:32:52\n",0.03);
 Sprtt("Updata Content :\n",0.03);
-Sprtt("  1.å®Œå–„äº†æˆ˜æ–—æœºåˆ¶ \n",0.03);
-Sprtt("  2.å®Œå–„åœ°å›¾ï¼šè’èŠœä¹‹åœ°è¾¹ç¼˜\n",0.03);
-Sprtt("  3.æ·»åŠ äº†Bossï¼šèŒçŽ‹\n",0.03);
-Sprtt("  4.ä¼˜åŒ–äº†æ˜¾ç¤ºbug \n",0.03);
-Sprtt("  5.å®žçŽ°äº†æ€ªç‰©ç‰©å“æŽ‰è½\n",0.03);
-Sprtt("  6.æž„æƒ³åœ°å›¾ï¼šè’èŠœä¹‹åœ° æš—å¤œä¹‹æ£® \n",0.03);
-Sprtt("  7.å®Œæˆåœ°å›¾æ–‡æ¡ˆ\n",0.03);
+Sprtt("  1.ÍêÉÆÁËÕ½¶·»úÖÆ \n",0.03);
+Sprtt("  2.ÍêÉÆµØÍ¼£º»ÄÎßÖ®µØ±ßÔµ\n",0.03);
+Sprtt("  3.Ìí¼ÓÁËBoss£ºÃÈÍõ\n",0.03);
+Sprtt("  4.ÓÅ»¯ÁËÏÔÊ¾bug \n",0.03);
+Sprtt("  5.ÊµÏÖÁË¹ÖÎïÎïÆ·µôÂä\n",0.03);
+Sprtt("  6.¹¹ÏëµØÍ¼£º»ÄÎßÖ®µØ °µÒ¹Ö®É­ \n",0.03);
+Sprtt("  7.Íê³ÉµØÍ¼ÎÄ°¸\n",0.03);
 Sprtt("=========================================\n",0.03);
 Sprtt("=========================================\n",0.03);
 Sprtt("Version : 1.0.4\n",0.03);
 Sprtt("Updata Date : 2021-10-30 00:34:09\n",0.03);
 Sprtt("Updata Content :\n",0.03);
-Sprtt("  1.å®žçŽ°æŽ¢ç´¢å¯è§†åŒ–\n",0.03);
-Sprtt("  2.æ›´æ–°æŽ¢ç´¢æœºåˆ¶\n",0.03);
-Sprtt("  3.è£…è½½æ›´æ–°æ—¥å¿—\n",0.03);
-Sprtt("  4.å®žçŽ°æ’ä»¶ï¼šæ›´æ–°æ—¥å¿—å¯¼å…¥\n",0.03);
-Sprtt("  5.å¼•å…¥è°ƒæŸ¥å…µå›¢\n",0.03);
-Sprtt("  6.å®Œå–„åœ°å›¾ï¼šè’èŠœä¹‹åœ°è¾¹ç¼˜\n",0.03);
-Sprtt("  7.ä¼˜åŒ–äº†æ–‡å­—æ˜¾ç¤ºé€Ÿåº¦\n",0.03);
-Sprtt("  8.æ›´æ–°äº†ç‰ˆæœ¬å·æ˜¾ç¤º\n",0.03);
+Sprtt("  1.ÊµÏÖÌ½Ë÷¿ÉÊÓ»¯\n",0.03);
+Sprtt("  2.¸üÐÂÌ½Ë÷»úÖÆ\n",0.03);
+Sprtt("  3.×°ÔØ¸üÐÂÈÕÖ¾\n",0.03);
+Sprtt("  4.ÊµÏÖ²å¼þ£º¸üÐÂÈÕÖ¾µ¼Èë\n",0.03);
+Sprtt("  5.ÒýÈëµ÷²é±øÍÅ\n",0.03);
+Sprtt("  6.ÍêÉÆµØÍ¼£º»ÄÎßÖ®µØ±ßÔµ\n",0.03);
+Sprtt("  7.ÓÅ»¯ÁËÎÄ×ÖÏÔÊ¾ËÙ¶È\n",0.03);
+Sprtt("  8.¸üÐÂÁË°æ±¾ºÅÏÔÊ¾\n",0.03);
 Sprtt("=========================================\n",0.03);
 
 }
+#pragma endregion 
+
 int main(){
-    
+#pragma region // ¹â±ê´¦Àí
+HANDLE handle = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO CursorInfo;
+	GetConsoleCursorInfo(handle, &CursorInfo);//»ñÈ¡¿ØÖÆÌ¨¹â±êÐÅÏ¢
+	CursorInfo.bVisible = false; //Òþ²Ø¿ØÖÆÌ¨¹â±ê
+	SetConsoleCursorInfo(handle, &CursorInfo);//ÉèÖÃ¿ØÖÆÌ¨¹â±ê×´Ì¬
+#pragma endregion
+
 	char c; srand(time(0)); Build_Project();
-//goto test2;
+goto test3;
 headd:
-	prt(">MonsterHunter<\n    ----Version:v1.0.4----\n\n\næ˜¯å¦è·³è¿‡ä¸­äºŒçš„åºç« \n\næŒ‰Aä¸è·³è¿‡\næŒ‰Bè·³è¿‡\næŒ‰CæŸ¥çœ‹æ›´æ–°è®°å½•\n");
+#pragma region //·âÃæ
+    Reset_Map(); Build_Map();
+	prt(">FancyHunter Version:v1.0.4<\n\n\nÊÇ·ñÌø¹ýÖÐ¶þµÄÐòÕÂ\n\n°´A²»Ìø¹ý\n°´BÌø¹ý\n°´C²é¿´¸üÐÂ¼ÇÂ¼\n");
 	Read(c,'a','c');
     if(c=='c'){
         system("cls");
@@ -582,21 +679,23 @@ headd:
         goto headd;
     } 
 	if(c=='a') ProText();
-    
-test2:	
-		
+#pragma endregion
+
+test2:			
 	while(ChooseJobs());
 	
-{// Chapter_1  è’èŠœä¹‹åœ°è¾¹å¢ƒ   
-  	prtt("å’Œè°ƒæŸ¥å…µå›¢ä¸€èµ·ï¼Œä½ ä»¬è¿ˆå‡ºäº†åœ£åŸŽé«˜å¢™\nåœ¨è’èŠœä¹‹åœ°å¤–æ˜¯ä¸€ç‰‡è¯ºå¤§çš„æš—é’è‰²å¹³åŽŸ\n");
-    prtt("è¿™é‡Œç”Ÿæ´»ç€ä¸€ç¾¤å¼±å°ä½†æ•æ·çš„ç”Ÿç‰©ï¼šå²èŽ±å§†\n");
-    prtt("è€Œä¼ è¯´åœ¨è¿™ç¾¤å²èŽ±å§†ä¸­ï¼Œæœ‰ç€ä¸€åªç¯¡å¤ºè¿‡å¤é¾™ä¹‹åŠ›çš„å²èŽ±å§†çŽ‹\n");
+#pragma region// Chapter_1  »ÄÎßÖ®µØ±ß¾³   
+    system("cls");
+  	prtt("ºÍµ÷²é±øÍÅÒ»Æð£¬ÄãÃÇÂõ³öÁËÊ¥³Ç¸ßÇ½\nÔÚ»ÄÎßÖ®µØÍâÊÇÒ»Æ¬Åµ´óµÄ°µÇàÉ«Æ½Ô­\n");
+    prtt("ÕâÀïÉú»î×ÅÒ»ÈºÈõÐ¡µ«Ãô½ÝµÄÉúÎï£ºÊ·À³Ä·\n");
+    prtt("¶ø´«ËµÔÚÕâÈºÊ·À³Ä·ÖÐ£¬ÓÐ×ÅÒ»Ö»´Û¶á¹ý¹ÅÁúÖ®Á¦µÄÊ·À³Ä·Íõ\n");
     ps(1);
-    Reset_Map();
+test3:   
+    Reset_Map(); 
     while(Chapter_1());
-}	
+#pragma endregion	
     
     
-	prt("æ•¬è¯·æœŸå¾…åŽç»­\n"); Wait(); return 0;
+	prtt("¾´ÇëÆÚ´ýºóÐø\n"); Wait(); return 0;
     return 0;
 }
